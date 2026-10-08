@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>计算机组成原理 · 第一、二章</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fc;
+      color: #1a2639;
+      line-height: 1.6;
+      padding-top: 76px;
+    }
+
+    /* ===== 顶部导航 ===== */
+    .topnav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(210, 222, 240, 0.7);
+      box-shadow: 0 1px 20px rgba(20, 50, 100, 0.05);
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: -1px; left: 0;
+      height: 2px; width: 0%;
+      background: linear-gradient(90deg, #3b6cb0, #5b8fd4);
+      transition: width 0.1s linear;
+    }
+
+    .topnav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0.65rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1f3a6e;
+      white-space: nowrap;
+      padding-right: 1.2rem;
+      border-right: 1px solid #e2eaf5;
+    }
+
+    .brand-icon {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #3b6cb0, #2a5298);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(59, 108, 176, 0.35);
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 0.3rem;
+      flex: 1;
+    }
+
+    .nav-item { position: relative; }
+
+    .nav-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #3a5075;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .nav-trigger:hover,
+    .nav-item.open .nav-trigger {
+      background: #e9eff9;
+      color: #1f3a6e;
+    }
+
+    .nav-trigger.active {
+      background: #3b6cb0;
+      color: white;
+    }
+
+    .nav-trigger .chevron {
+      font-size: 0.65rem;
+      transition: transform 0.25s;
+      opacity: 0.6;
+    }
+
+    .nav-item.open .chevron { transform: rotate(180deg); }
+
+    .dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 280px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(20, 50, 100, 0.14);
+      border: 1px solid #e6eefa;
+      padding: 0.5rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    .nav-item.open .dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown a {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      color: #3a5075;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .dropdown a:hover,
+    .dropdown a.active {
+      background: #eef4fc;
+      color: #1f3a6e;
+    }
+
+    .dropdown a.active { font-weight: 600; }
+
+    .dropdown a .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #b8cbe0;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .dropdown a:hover .dot,
+    .dropdown a.active .dot {
+      background: #3b6cb0;
+      box-shadow: 0 0 0 3px rgba(59, 108, 176, 0.15);
+    }
+
+    .dropdown a .num {
+      font-weight: 600;
+      color: #5c7ba8;
+      font-size: 0.82rem;
+      min-width: 32px;
+    }
+
+    .dropdown a.active .num { color: #3b6cb0; }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.4rem;
+      padding-left: 1rem;
+      border-left: 1px solid #e2eaf5;
+    }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #5c7ba8;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .icon-btn:hover { background: #e9eff9; color: #3b6cb0; }
+
+    .icon-btn::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: -34px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-4px);
+      background: #1f3a6e;
+      color: white;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mobile-toggle {
+      display: none;
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      border: 1px solid #e2eaf5;
+      background: white;
+      color: #3a5075;
+      font-size: 1rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== 主容器 ===== */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 3rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding: 1.5rem 1rem;
+    }
+
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p { font-size: 1.05rem; color: #4a5b7a; }
+
+    /* ===== 章节 ===== */
+    .chapter {
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 10px 30px rgba(0, 20, 50, 0.07);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      scroll-margin-top: 90px;
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.9rem;
+      border-bottom: 2px dashed #d0ddeb;
+    }
+
+    .chapter-header i {
+      font-size: 2rem;
+      color: #2a5298;
+      background: #e9eff9;
+      padding: 0.55rem;
+      border-radius: 16px;
+    }
+
+    .chapter-header h2 {
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: #0b1e3a;
+    }
+
+    .chapter-header h2 span {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #5c6f8f;
+      margin-left: 0.6rem;
+      background: #eef2f9;
+      padding: 0.2rem 0.75rem;
+      border-radius: 30px;
+    }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      margin-bottom: 0.9rem;
+      border: 1px solid #e3ebf6;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .card:hover {
+      border-color: #b8cbe0;
+      box-shadow: 0 4px 14px rgba(30, 60, 120, 0.06);
+    }
+
+    .card.open {
+      border-color: #9db8dc;
+      box-shadow: 0 6px 20px rgba(30, 60, 120, 0.08);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 1.05rem 1.3rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .card-head:hover { background: #f7faff; }
+    .card.open .card-head { background: #f0f6ff; }
+
+    .card-icon {
+      width: 38px; height: 38px;
+      border-radius: 11px;
+      background: #e9eff9;
+      color: #3b6cb0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all 0.25s;
+    }
+
+    .card.open .card-icon {
+      background: #3b6cb0;
+      color: white;
+    }
+
+    .card-title-text {
+      flex: 1;
+      font-weight: 600;
+      font-size: 1.06rem;
+      color: #1f3a6e;
+    }
+
+    .card-arrow {
+      color: #8fa3bf;
+      font-size: 0.85rem;
+      transition: transform 0.3s ease;
+    }
+
+    .card.open .card-arrow {
+      transform: rotate(180deg);
+      color: #3b6cb0;
+    }
+
+    .card-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, padding 0.3s ease;
+      padding: 0 1.3rem;
+    }
+
+    .card.open .card-body {
+      max-height: 6000px;
+      padding: 0 1.3rem 1.3rem 1.3rem;
+    }
+
+    .card-body p { margin-bottom: 0.6rem; color: #2c3e50; }
+    .card-body ul, .card-body ol { padding-left: 1.3rem; color: #2c3e50; margin-bottom: 0.6rem; }
+    .card-body li { margin-bottom: 0.35rem; }
+    .card-body .sub-list { padding-left: 1.2rem; margin-top: 0.2rem; }
+
+    /* 表格 */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0.8rem 0;
+      border-radius: 14px;
+      border: 1px solid #dfe8f2;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      background: white;
+    }
+
+    th {
+      background: #eef4fc;
+      font-weight: 600;
+      color: #1f3a6e;
+      padding: 0.8rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #cdddec;
+    }
+
+    td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid #e6edf8;
+      color: #1e2e4a;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f6faff; }
+
+    /* 公式/徽章/高亮 */
+    .formula {
+      background: #f0f6ff;
+      padding: 0.3rem 0.75rem;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: #0b2c5e;
+      display: inline-block;
+      margin: 0.15rem 0.2rem 0.15rem 0;
+      border: 1px solid #cdddf5;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e2eaf8;
+      color: #1f3a6e;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 30px;
+      margin: 0.15rem 0.3rem 0.15rem 0;
+    }
+
+    .highlight {
+      background: #fff1d9;
+      padding: 0.1rem 0.4rem;
+      border-radius: 6px;
+      font-weight: 500;
+      color: #a65d00;
+    }
+
+    .note-box {
+      background: #eef6ff;
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      margin-top: 0.7rem;
+      font-size: 0.94rem;
+      border-left: 4px solid #3b6cb0;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ===== 例题/练习 选项卡 ===== */
+    .practice-section {
+      margin-top: 1.2rem;
+      border-radius: 14px;
+      background: #f9fbff;
+      border: 1px dashed #cad9f0;
+      overflow: hidden;
+    }
+
+    .tabs {
+      display: flex;
+      background: #eef4fc;
+      border-bottom: 1px solid #dae6f5;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #5c7ba8;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      background: #e6eefa;
+      color: #3b6cb0;
+    }
+
+    .tab-btn.active {
+      color: #1f3a6e;
+      background: white;
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: #3b6cb0;
+      border-radius: 2px;
+    }
+
+    .tab-content {
+      padding: 1.2rem 1.3rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== 例题样式 ===== */
+    .example-item {
+      background: white;
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #5b8fd4;
+      box-shadow: 0 2px 8px rgba(30, 60, 120, 0.04);
+    }
+
+    .example-item:last-child { margin-bottom: 0; }
+
+    .example-title {
+      font-weight: 600;
+      color: #1f3a6e;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .example-title .tag {
+      font-size: 0.7rem;
+      background: #5b8fd4;
+      color: white;
+      padding: 0.15rem 0.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+    }
+
+    .example-question {
+      color: #2c3e50;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .step-container {
+      display: none;
+      margin-top: 0.8rem;
+      border-top: 1px dashed #dae6f5;
+      padding-top: 0.8rem;
+    }
+
+    .step-container.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-item {
+      padding: 0.55rem 0.9rem;
+      margin-bottom: 0.5rem;
+      background: #f0f6ff;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #1e3a6e;
+      border-left: 3px solid #5b8fd4;
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+
+    .step-item.visible {
+      animation: stepSlide 0.4s forwards;
+    }
+
+    @keyframes stepSlide {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .step-item .step-num {
+      display: inline-block;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #5b8fd4;
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 22px;
+      margin-right: 0.5rem;
+    }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: none;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: #3b6cb0;
+      color: white;
+      box-shadow: 0 2px 8px rgba(59, 108, 176, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #2a5298;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 108, 176, 0.35);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-outline {
+      background: white;
+      color: #3b6cb0;
+      border: 1px solid #b8cbe0;
+    }
+
+    .btn-outline:hover {
+      background: #f0f6ff;
+      border-color: #3b6cb0;
+    }
+
+    .btn-success {
+      background: #2e9e6b;
+      color: white;
+    }
+
+    .btn-success:hover { background: #268257; }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    /* ===== 练习样式 ===== */
+    .exercise-item {
+      background: white;
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #e6a017;
+      box-shadow: 0 2px 8px rgba(30, 60, 120, 0.04);
+    }
+
+    .exercise-item:last-child { margin-bottom: 0; }
+
+    .exercise-question {
+      font-weight: 500;
+      color: #1f3a6e;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .exercise-question .q-num {
+      background: #fff1d9;
+      color: #a65d00;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 30px;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+
+    .answer-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+
+    .answer-input {
+      flex: 1;
+      min-width: 160px;
+      padding: 0.55rem 0.9rem;
+      border-radius: 10px;
+      border: 1.5px solid #cdddec;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #1f3a6e;
+      outline: none;
+      transition: all 0.2s;
+      background: #fafcff;
+    }
+
+    .answer-input:focus {
+      border-color: #3b6cb0;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(59, 108, 176, 0.12);
+    }
+
+    .answer-input.correct {
+      border-color: #2e9e6b;
+      background: #f0fbf6;
+    }
+
+    .answer-input.wrong {
+      border-color: #dc4a4a;
+      background: #fff5f5;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .option-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #cdddec;
+      background: white;
+      color: #3a5075;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: #3b6cb0;
+      color: #3b6cb0;
+      background: #f0f6ff;
+    }
+
+    .option-btn.selected {
+      background: #3b6cb0;
+      border-color: #3b6cb0;
+      color: white;
+    }
+
+    .option-btn.correct {
+      background: #2e9e6b;
+      border-color: #2e9e6b;
+      color: white;
+    }
+
+    .option-btn.wrong {
+      background: #dc4a4a;
+      border-color: #dc4a4a;
+      color: white;
+    }
+
+    .option-btn:disabled { cursor: default; }
+
+    /* 反馈 */
+    .feedback {
+      display: none;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-top: 0.6rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .feedback.show { display: block; }
+
+    .feedback.correct {
+      background: #e8f8f0;
+      color: #1d6b47;
+      border-left: 4px solid #2e9e6b;
+    }
+
+    .feedback.wrong {
+      background: #fff0f0;
+      color: #a83a3a;
+      border-left: 4px solid #dc4a4a;
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .feedback .fb-title {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .feedback .solution {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      color: #2c3e50;
+      font-size: 0.87rem;
+      line-height: 1.55;
+    }
+
+    /* 脉冲动画 */
+    .pulse-correct {
+      animation: pulseGreen 0.6s ease;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0 rgba(46, 158, 107, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(46, 158, 107, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 158, 107, 0); }
+    }
+
+    /* ===== 页脚 ===== */
+    .footer-note {
+      text-align: center;
+      margin-top: 3rem;
+      color: #7c8ba8;
+      font-size: 0.88rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #dae3f0;
+    }
+
+    /* 回到顶部 */
+    .totop {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: #3b6cb0;
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(59, 108, 176, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .totop.show { opacity: 1; visibility: visible; }
+    .totop:hover { background: #2a5298; transform: translateY(-3px); }
+
+    /* ===== 移动端侧滑菜单 ===== */
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 25, 50, 0.4);
+      backdrop-filter: blur(3px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 1200;
+    }
+
+    .mobile-overlay.show { opacity: 1; visibility: visible; }
+
+    .mobile-menu {
+      position: fixed;
+      top: 0; right: -320px;
+      width: 300px; height: 100%;
+      background: white;
+      z-index: 1300;
+      padding: 1.5rem;
+      overflow-y: auto;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -10px 0 40px rgba(20, 50, 100, 0.15);
+    }
+
+    .mobile-menu.show { right: 0; }
+
+    .mobile-menu h3 {
+      font-size: 0.78rem;
+      color: #8fa3bf;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin: 1.2rem 0 0.6rem;
+    }
+
+    .mobile-menu h3:first-of-type { margin-top: 0.5rem; }
+
+    .mobile-menu a {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #3a5075;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+      background: #eef4fc;
+      color: #1f3a6e;
+    }
+
+    .mobile-menu a.active { font-weight: 600; }
+
+    .mobile-menu a .num {
+      font-weight: 600;
+      color: #5c7ba8;
+      min-width: 32px;
+      font-size: 0.82rem;
+    }
+
+    .mobile-menu a.active .num { color: #3b6cb0; }
+
+    .mobile-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: #f0f4fa;
+      color: #5c7ba8;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 860px) {
+      .nav-links-desktop { display: none; }
+      .mobile-toggle { display: flex; }
+      .brand { border-right: none; padding-right: 0; flex: 1; }
+      .nav-actions { border-left: none; padding-left: 0; }
+    }
+
+    @media (max-width: 700px) {
+      body { padding-top: 68px; }
+      .header h1 { font-size: 1.7rem; }
+      .chapter { padding: 1.3rem; }
+      .chapter-header h2 { font-size: 1.3rem; }
+      .chapter-header h2 span { display: block; margin: 0.3rem 0 0; }
+      .card-title-text { font-size: 0.98rem; }
+      .totop { bottom: 1.2rem; right: 1.2rem; }
+      .tab-content { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== 顶部导航 ===== -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="fas fa-microchip"></i></div>
+        <span>计组 · 一二章</span>
+      </div>
+
+      <div class="nav-menu nav-links-desktop">
+        <div class="nav-item" data-chapter="ch1">
+          <div class="nav-trigger" data-target="ch1">
+            第一章 · 系统概论
+            <i class="fas fa-chevron-down chevron"></i>
+          </div>
+          <div class="dropdown">
+            <a href="#c11"><span class="dot"></span><span class="num">1.1</span> 系统组成</a>
+            <a href="#c12"><span class="dot"></span><span class="num">1.2</span> 硬件组成</a>
+            <a href="#c13"><span class="dot"></span><span class="num">1.3</span> 软件</a>
+            <a href="#c14"><span class="dot"></span><span class="num">1.4</span> 工作过程</a>
+            <a href="#c15"><span class="dot"></span><span class="num">1.5</span> 性能指标</a>
+            <a href="#c16"><span class="dot"></span><span class="num">1.6</span> 分类发展</a>
+          </div>
+        </div>
+
+        <div class="nav-item" data-chapter="ch2">
+          <div class="nav-trigger" data-target="ch2">
+            第二章 · 开关理论
+            <i class="fas fa-chevron-down chevron"></i>
+          </div>
+          <div class="dropdown">
+            <a href="#c21"><span class="dot"></span><span class="num">2.1</span> 逻辑基础</a>
+            <a href="#c22"><span class="dot"></span><span class="num">2.2</span> 逻辑代数</a>
+            <a href="#c23"><span class="dot"></span><span class="num">2.3</span> 基本定律</a>
+            <a href="#c24"><span class="dot"></span><span class="num">2.4</span> 表示方法</a>
+            <a href="#c25"><span class="dot"></span><span class="num">2.5</span> 函数化简</a>
+            <a href="#c26"><span class="dot"></span><span class="num">2.6</span> 门电路</a>
+            <a href="#c27"><span class="dot"></span><span class="num">2.7</span> 组合逻辑</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="expandAll" data-tip="全部展开">
+          <i class="fas fa-angle-double-down"></i>
+        </button>
+        <button class="icon-btn" id="collapseAll" data-tip="全部收起">
+          <i class="fas fa-angle-double-up"></i>
+        </button>
+        <button class="mobile-toggle" id="mobileToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+    <div class="progress-bar" id="progressBar"></div>
+  </nav>
+
+  <!-- 移动端菜单 -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" id="mobileClose"><i class="fas fa-times"></i></button>
+    <h3>第一章 · 系统概论</h3>
+    <a href="#c11"><span class="num">1.1</span> 系统组成</a>
+    <a href="#c12"><span class="num">1.2</span> 硬件组成</a>
+    <a href="#c13"><span class="num">1.3</span> 软件</a>
+    <a href="#c14"><span class="num">1.4</span> 工作过程</a>
+    <a href="#c15"><span class="num">1.5</span> 性能指标</a>
+    <a href="#c16"><span class="num">1.6</span> 分类发展</a>
+    <h3>第二章 · 开关理论</h3>
+    <a href="#c21"><span class="num">2.1</span> 逻辑基础</a>
+    <a href="#c22"><span class="num">2.2</span> 逻辑代数</a>
+    <a href="#c23"><span class="num">2.3</span> 基本定律</a>
+    <a href="#c24"><span class="num">2.4</span> 表示方法</a>
+    <a href="#c25"><span class="num">2.5</span> 函数化简</a>
+    <a href="#c26"><span class="num">2.6</span> 门电路</a>
+    <a href="#c27"><span class="num">2.7</span> 组合逻辑</a>
+  </div>
+
+  <!-- ===== 主内容 ===== -->
+  <div class="container">
+    <div class="header">
+      <h1>计算机组成原理</h1>
+      <p>第一章 · 计算机系统概论 &nbsp;|&nbsp; 第二章 · 开关理论基础</p>
+    </div>
+
+    <!-- ========= 第一章 ========= -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-header">
+        <i class="fas fa-microchip"></i>
+        <h2>第一章 计算机系统概论 <span>硬件与软件</span></h2>
+      </div>
+
+      <!-- 1.1 -->
+      <div class="card" id="c11">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-cubes"></i></div>
+          <div class="card-title-text">1.1 计算机系统基本组成</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <p><span class="highlight">计算机系统 = 硬件 + 软件</span></p>
+          <ul>
+            <li><strong>硬件</strong>：CPU、内存、硬盘、键盘、显示器等物理设备</li>
+            <li><strong>软件</strong>：程序 + 文档，分为系统软件和应用软件</li>
+          </ul>
+          <p style="margin-top:0.6rem;"><strong>冯·诺依曼五大部件：</strong></p>
+          <ol>
+            <li>运算器 —— 算术/逻辑运算</li>
+            <li>控制器 —— 指挥协调</li>
+            <li>存储器 —— 存放程序和数据</li>
+            <li>输入设备 —— 接收外部信息</li>
+            <li>输出设备 —— 输出结果</li>
+          </ol>
+          <div class="note-box">
+            <i class="fas fa-lightbulb" style="color:#e6a017;"></i>
+            核心特点：<strong>存储程序、程序控制</strong>
+          </div>
+
+          <!-- 例题与练习 -->
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+
+            <!-- 例题 -->
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 冯·诺依曼结构核心思想</div>
+                <div class="example-question">
+                  现代计算机普遍采用冯·诺依曼结构，它的核心思想是什么？
+                </div>
+                <button class="btn btn-primary btn-sm reveal-steps">
+                  <i class="fas fa-play"></i> 查看解析
+                </button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>冯·诺依曼结构的关键在于"<strong>存储程序</strong>"——把程序像数据一样存进存储器。</div>
+                  <div class="step-item"><span class="step-num">2</span>计算机按顺序从存储器中取出指令并执行，即"<strong>程序控制</strong>"。</div>
+                  <div class="step-item"><span class="step-num">3</span>因此五大部件（运算器、控制器、存储器、输入、输出）以运算器为中心协同工作。</div>
+                  <div class="step-item"><span class="step-num">4</span>现代机器已改为<strong>以存储器为中心</strong>，但存储程序思想不变。</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 练习 -->
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="B" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>
+                  冯·诺依曼计算机中，指令和数据都存放在哪里？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. 运算器</button>
+                  <button class="option-btn" data-value="B">B. 存储器</button>
+                  <button class="option-btn" data-value="C">C. 控制器</button>
+                  <button class="option-btn" data-value="D">D. 输入设备</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback">
+                  <div class="fb-title"></div>
+                  <div class="solution"></div>
+                </div>
+              </div>
+
+              <div class="exercise-item" data-answer="存储程序" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">2</span>
+                  冯·诺依曼结构的核心思想是________和程序控制。（填四个字）
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="请输入答案…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback">
+                  <div class="fb-title"></div>
+                  <div class="solution"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.2 -->
+      <div class="card" id="c12">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-microchip"></i></div>
+          <div class="card-title-text">1.2 计算机硬件组成</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li><strong>CPU = 运算器 + 控制器</strong>
+              <ul class="sub-list">
+                <li>运算器：ALU、寄存器、累加器</li>
+                <li>控制器：PC、IR、时序电路、微操作信号发生器</li>
+              </ul>
+            </li>
+            <li><strong>存储器</strong>：主存（内存）、辅存（外存）</li>
+            <li><strong>总线</strong>：数据总线、地址总线、控制总线</li>
+          </ul>
+          <p><span class="badge">主机 = CPU + 主存</span> <span class="badge">外设 = 输入/输出/外存</span></p>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> CPU 的组成</div>
+                <div class="example-question">CPU 由哪两大部分组成？各自的功能是什么？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>CPU = <strong>运算器</strong> + <strong>控制器</strong>。</div>
+                  <div class="step-item"><span class="step-num">2</span>运算器负责算术运算（加减乘除）和逻辑运算（与或非），核心部件是 ALU。</div>
+                  <div class="step-item"><span class="step-num">3</span>控制器负责指挥协调，包含 PC（程序计数器）、IR（指令寄存器）等。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="A" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>以下哪个部件不属于 CPU？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. 主存</button>
+                  <button class="option-btn" data-value="B">B. 运算器</button>
+                  <button class="option-btn" data-value="C">C. 控制器</button>
+                  <button class="option-btn" data-value="D">D. 寄存器</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+              <div class="exercise-item" data-answer="程序计数器" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">2</span>PC 的中文名称是________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="请输入答案…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.3 -->
+      <div class="card" id="c13">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-code"></i></div>
+          <div class="card-title-text">1.3 计算机软件</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table>
+              <tr><th>分类</th><th>说明</th><th>举例</th></tr>
+              <tr><td>系统软件</td><td>管理硬件、支持应用</td><td>操作系统、编译程序</td></tr>
+              <tr><td>应用软件</td><td>解决具体问题</td><td>Word、浏览器</td></tr>
+            </table>
+          </div>
+          <p style="margin-top:0.7rem;"><i class="fas fa-language"></i> 语言层次：机器语言 → 汇编语言 → 高级语言</p>
+          <p><strong>翻译程序：</strong></p>
+          <ul>
+            <li>汇编程序：汇编语言 → 机器语言</li>
+            <li>编译程序：高级语言 → 机器语言（整体翻译）</li>
+            <li>解释程序：高级语言 → 逐句解释执行</li>
+          </ul>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 编译 vs 解释</div>
+                <div class="example-question">编译程序和解释程序的主要区别是什么？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span><strong>编译程序</strong>：把整个高级语言源程序一次性翻译成机器语言目标程序，再执行。</div>
+                  <div class="step-item"><span class="step-num">2</span><strong>解释程序</strong>：逐句翻译并立即执行，不生成目标程序。</div>
+                  <div class="step-item"><span class="step-num">3</span>编译方式执行速度快，解释方式灵活、便于调试。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="C" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>以下哪个属于系统软件？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. Word</button>
+                  <button class="option-btn" data-value="B">B. 浏览器</button>
+                  <button class="option-btn" data-value="C">C. 操作系统</button>
+                  <button class="option-btn" data-value="D">D. 游戏</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.4 -->
+      <div class="card" id="c14">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-play-circle"></i></div>
+          <div class="card-title-text">1.4 计算机的工作过程</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <ol>
+            <li>取指令（PC → 地址 → 取指令 → IR）</li>
+            <li>分析指令（译码）</li>
+            <li>执行指令</li>
+            <li>更新PC，准备下一条</li>
+          </ol>
+          <p><span class="badge">指令周期 &gt; 机器周期 &gt; 时钟周期</span></p>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 指令执行流程</div>
+                <div class="example-question">请按顺序说明一条指令的执行过程。</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>取指令：PC 提供地址，从存储器取出指令送入 IR。</div>
+                  <div class="step-item"><span class="step-num">2</span>分析指令：对 IR 中的指令进行译码，确定操作类型。</div>
+                  <div class="step-item"><span class="step-num">3</span>执行指令：由控制器发出控制信号，完成操作。</div>
+                  <div class="step-item"><span class="step-num">4</span>更新 PC：PC 自动加 1，指向下一条指令。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="B" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>指令周期、机器周期、时钟周期三者的关系是？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. 指令周期 &lt; 机器周期 &lt; 时钟周期</button>
+                  <button class="option-btn" data-value="B">B. 指令周期 &gt; 机器周期 &gt; 时钟周期</button>
+                  <button class="option-btn" data-value="C">C. 三者相等</button>
+                  <button class="option-btn" data-value="D">D. 无固定关系</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.5 -->
+      <div class="card" id="c15">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-tachometer-alt"></i></div>
+          <div class="card-title-text">1.5 主要性能指标</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table>
+              <tr><th>指标</th><th>含义</th></tr>
+              <tr><td>机器字长</td><td>CPU一次能处理的二进制位数</td></tr>
+              <tr><td>主频</td><td>时钟频率，单位 Hz</td></tr>
+              <tr><td>存储容量</td><td>主存能存放的字节数</td></tr>
+              <tr><td>运算速度</td><td>MIPS、CPI、FLOPS</td></tr>
+              <tr><td>吞吐量</td><td>单位时间完成的任务量</td></tr>
+              <tr><td>响应时间</td><td>从请求到结果的时间</td></tr>
+            </table>
+          </div>
+          <p style="margin-top:0.6rem;">
+            <span class="formula">CPU时间 = 指令数 × CPI × 时钟周期</span>
+            <span class="formula">MIPS = 指令数 / (执行时间 × 10⁶)</span>
+          </p>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> CPU 时间计算</div>
+                <div class="example-question">
+                  某程序共 10⁶ 条指令，CPI = 2，时钟频率 = 1 GHz，求 CPU 执行时间。
+                </div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>时钟周期 = 1 / 时钟频率 = 1 / (1×10⁹) = 1 ns</div>
+                  <div class="step-item"><span class="step-num">2</span>CPU 时间 = 指令数 × CPI × 时钟周期</div>
+                  <div class="step-item"><span class="step-num">3</span>= 10⁶ × 2 × 1 ns = 2 × 10⁶ ns = <strong>2 ms</strong></div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="2" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>
+                  某程序 10⁶ 条指令，CPI = 1，时钟频率 500 MHz，CPU 执行时间为________ms。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="请输入数字…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.6 -->
+      <div class="card" id="c16">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="card-title-text">1.6 计算机分类与发展</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li><strong>按规模：</strong>巨型机、大型机、小型机、微型机</li>
+            <li><strong>按用途：</strong>通用机、专用机</li>
+            <li><strong>发展代际：</strong>电子管 → 晶体管 → 集成电路 → 超大规模集成电路</li>
+          </ul>
+          <div class="note-box">
+            <i class="fas fa-chart-simple"></i>
+            <strong>摩尔定律：</strong>集成电路上晶体管数目约每18-24个月翻一番。
+          </div>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 摩尔定律</div>
+                <div class="example-question">什么是摩尔定律？它对计算机发展有什么影响？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>摩尔定律：集成电路上可容纳的晶体管数目约每 18-24 个月翻一番。</div>
+                  <div class="step-item"><span class="step-num">2</span>它推动了计算机性能的快速提升和成本的持续下降。</div>
+                  <div class="step-item"><span class="step-num">3</span>也是"微型机"能不断更新换代的理论基础。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="A" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>计算机发展的第一代主要采用什么元器件？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. 电子管</button>
+                  <button class="option-btn" data-value="B">B. 晶体管</button>
+                  <button class="option-btn" data-value="C">C. 集成电路</button>
+                  <button class="option-btn" data-value="D">D. 超大规模集成电路</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========= 第二章 ========= -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-header">
+        <i class="fas fa-toggle-on"></i>
+        <h2>第二章 开关理论基础 <span>逻辑代数与门电路</span></h2>
+      </div>
+
+      <!-- 2.1 -->
+      <div class="card" id="c21">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-signal"></i></div>
+          <div class="card-title-text">2.1 数字逻辑基础</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li><strong>数字信号 vs 模拟信号：</strong>数字信号离散（0/1）；模拟信号连续变化</li>
+            <li><strong>正逻辑：</strong>高电平 = 1，低电平 = 0</li>
+            <li><strong>负逻辑：</strong>高电平 = 0，低电平 = 1</li>
+          </ul>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 正逻辑与负逻辑</div>
+                <div class="example-question">同一个电平信号，在正逻辑和负逻辑下对应的值有什么不同？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>正逻辑：高电平 = 1，低电平 = 0。</div>
+                  <div class="step-item"><span class="step-num">2</span>负逻辑：高电平 = 0，低电平 = 1。</div>
+                  <div class="step-item"><span class="step-num">3</span>同一个物理电平在两种逻辑下表示的值是<strong>相反</strong>的，但电路本身并没有变。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="负逻辑" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>若规定高电平表示 0，低电平表示 1，这种逻辑称为________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="请输入答案…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 -->
+      <div class="card" id="c22">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-calculator"></i></div>
+          <div class="card-title-text">2.2 逻辑代数（布尔代数）</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <p><strong>三种基本运算：</strong></p>
+          <div class="table-wrap">
+            <table>
+              <tr><th>运算</th><th>符号</th><th>表达式</th><th>口诀</th></tr>
+              <tr><td>与</td><td>· / ∧</td><td>Y = A·B</td><td>全1才1</td></tr>
+              <tr><td>或</td><td>+ / ∨</td><td>Y = A+B</td><td>有1就1</td></tr>
+              <tr><td>非</td><td>′ / ¬</td><td>Y = A′</td><td>取反</td></tr>
+            </table>
+          </div>
+          <p style="margin-top:0.7rem;"><strong>复合运算：</strong></p>
+          <ul>
+            <li>与非：Y = (A·B)′</li>
+            <li>或非：Y = (A+B)′</li>
+            <li>异或：Y = A⊕B = A′B + AB′</li>
+            <li>同或：Y = A⊙B = AB + A′B′</li>
+          </ul>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 异或运算</div>
+                <div class="example-question">
+                  A = 1，B = 0，求 A⊕B 的值。
+                </div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>异或定义：A⊕B = A′B + AB′</div>
+                  <div class="step-item"><span class="step-num">2</span>代入 A=1，B=0：A′B = 0·0 = 0，AB′ = 1·1 = 1</div>
+                  <div class="step-item"><span class="step-num">3</span>所以 A⊕B = 0 + 1 = <strong>1</strong></div>
+                  <div class="step-item"><span class="step-num">4</span>口诀记忆：<strong>不同出 1，相同出 0</strong>。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="0" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>当 A = 1，B = 1 时，A⊕B 的值为________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="输入 0 或 1…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+              <div class="exercise-item" data-answer="1" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">2</span>当 A = 1，B = 0 时，A⊙B（同或）的值为________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="输入 0 或 1…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.3 -->
+      <div class="card" id="c23">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-scale-balanced"></i></div>
+          <div class="card-title-text">2.3 逻辑代数基本定律</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table>
+              <tr><th>定律</th><th>与形式</th><th>或形式</th></tr>
+              <tr><td>交换律</td><td>A·B = B·A</td><td>A+B = B+A</td></tr>
+              <tr><td>结合律</td><td>(AB)C = A(BC)</td><td>(A+B)+C = A+(B+C)</td></tr>
+              <tr><td>分配律</td><td>A(B+C)=AB+AC</td><td>A+BC=(A+B)(A+C)</td></tr>
+              <tr><td>吸收律</td><td>A+AB=A</td><td>A(A+B)=A</td></tr>
+              <tr><td>摩根定律</td><td>(AB)′=A′+B′</td><td>(A+B)′=A′·B′</td></tr>
+            </table>
+          </div>
+          <p style="margin-top:0.7rem;">
+            <span class="formula">A + A′ = 1</span>
+            <span class="formula">A · A′ = 0</span>
+            <span class="formula">A + 1 = 1</span>
+            <span class="formula">A · 0 = 0</span>
+          </p>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 摩根定律应用</div>
+                <div class="example-question">化简 (A·B)′ 并写出等价表达式。</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>摩根定律第一种形式：(A·B)′ = A′ + B′</div>
+                  <div class="step-item"><span class="step-num">2</span>口诀记忆：<strong>"与变或，各自非"</strong>。</div>
+                  <div class="step-item"><span class="step-num">3</span>第二种形式：(A+B)′ = A′·B′，口诀：<strong>"或变与，各自非"</strong>。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="A′+B′" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>根据摩根定律，(A·B)′ = ________。（用 A、B、′、+ 表示）
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="例如: A′+B′">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+              <div class="exercise-item" data-answer="A" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">2</span>根据吸收律，A + AB = ?
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. A</button>
+                  <button class="option-btn" data-value="B">B. B</button>
+                  <button class="option-btn" data-value="C">C. AB</button>
+                  <button class="option-btn" data-value="D">D. A+B</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.4 -->
+      <div class="card" id="c24">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-table"></i></div>
+          <div class="card-title-text">2.4 逻辑函数的表示方法</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <ol>
+            <li><strong>真值表</strong> —— 穷举输入输出</li>
+            <li><strong>逻辑表达式</strong> —— 代数式</li>
+            <li><strong>逻辑图</strong> —— 门电路连接图</li>
+            <li><strong>卡诺图</strong> —— 方格图化简</li>
+            <li><strong>波形图</strong> —— 时序变化</li>
+          </ol>
+          <p style="margin-top:0.6rem;"><strong>标准形式：</strong></p>
+          <ul>
+            <li>最小项：每个变量以原/反形式出现一次，如 A′BC</li>
+            <li>最大项：每个变量以原/反形式出现一次，如 A+B′+C</li>
+            <li>最小项之和 = 标准与或式；最大项之积 = 标准或与式</li>
+          </ul>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 最小项</div>
+                <div class="example-question">三变量 A、B、C 中，A′BC 是不是最小项？为什么？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>最小项要求每个变量都以原或反形式出现<strong>一次且仅一次</strong>。</div>
+                  <div class="step-item"><span class="step-num">2</span>A′BC 中 A 以反形式出现，B 和 C 都以原形式出现，各一次。</div>
+                  <div class="step-item"><span class="step-num">3</span>所以 A′BC 是<strong>最小项</strong>。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="B" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>以下哪个是三变量 A、B、C 的<strong>最小项</strong>？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. AB</button>
+                  <button class="option-btn" data-value="B">B. A′BC</button>
+                  <button class="option-btn" data-value="C">C. A+C</button>
+                  <button class="option-btn" data-value="D">D. ABC′+A</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.5 -->
+      <div class="card" id="c25">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-compress-alt"></i></div>
+          <div class="card-title-text">2.5 逻辑函数化简</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <div class="two-col">
+            <div>
+              <p><strong>代数化简法：</strong></p>
+              <ul>
+                <li>并项法：AB + AB′ = A</li>
+                <li>吸收法：A + AB = A</li>
+                <li>消去法：A + A′B = A + B</li>
+                <li>配项法：A = A(B+B′)</li>
+              </ul>
+            </div>
+            <div>
+              <p><strong>卡诺图化简法：</strong></p>
+              <ul>
+                <li>相邻格只有一位变化</li>
+                <li>圈越大越好，圈数越少越好</li>
+                <li>每个圈包含 2ⁿ 个 1</li>
+                <li>圈可以重叠，但每个圈要有新 1</li>
+                <li>无关项可圈可不圈</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 代数化简</div>
+                <div class="example-question">化简 Y = AB + AB′。</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>提取公因式 A：Y = A(B + B′)</div>
+                  <div class="step-item"><span class="step-num">2</span>由互补律：B + B′ = 1</div>
+                  <div class="step-item"><span class="step-num">3</span>所以 Y = A · 1 = <strong>A</strong></div>
+                  <div class="step-item"><span class="step-num">4</span>这就是<strong>并项法</strong>——两项合并成一项。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="A+B" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>化简 Y = A + A′B，结果为________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="例如: A+B">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.6 -->
+      <div class="card" id="c26">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-diagram-project"></i></div>
+          <div class="card-title-text">2.6 门电路基础</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table>
+              <tr><th>门</th><th>符号</th><th>功能</th></tr>
+              <tr><td>与门</td><td>AND</td><td>全1出1</td></tr>
+              <tr><td>或门</td><td>OR</td><td>有1出1</td></tr>
+              <tr><td>非门</td><td>NOT</td><td>取反</td></tr>
+              <tr><td>与非门</td><td>NAND</td><td>全1出0</td></tr>
+              <tr><td>或非门</td><td>NOR</td><td>有1出0</td></tr>
+              <tr><td>异或门</td><td>XOR</td><td>不同出1</td></tr>
+              <tr><td>同或门</td><td>XNOR</td><td>相同出1</td></tr>
+            </table>
+          </div>
+          <p style="margin-top:0.7rem;"><strong>TTL vs CMOS：</strong></p>
+          <ul>
+            <li>TTL：双极型，速度快，功耗大</li>
+            <li>CMOS：单极型，功耗低，抗干扰强</li>
+          </ul>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 与非门</div>
+                <div class="example-question">当输入端 A = 1，B = 1 时，与非门输出什么？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>与非门 = 与门 + 非门。</div>
+                  <div class="step-item"><span class="step-num">2</span>先做与运算：1 · 1 = 1。</div>
+                  <div class="step-item"><span class="step-num">3</span>再取反：1′ = <strong>0</strong>。</div>
+                  <div class="step-item"><span class="step-num">4</span>口诀：与非门<strong>全 1 出 0</strong>。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="1" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>或门输入端 A = 0，B = 1，输出为________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="输入 0 或 1…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+              <div class="exercise-item" data-answer="0" data-type="fill">
+                <div class="exercise-question">
+                  <span class="q-num">2</span>与非门输入端 A = 1，B = 0，输出为________。
+                </div>
+                <div class="answer-area">
+                  <input type="text" class="answer-input" placeholder="输入 0 或 1…">
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.7 -->
+      <div class="card" id="c27">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-puzzle-piece"></i></div>
+          <div class="card-title-text">2.7 组合逻辑电路初步</div>
+          <i class="fas fa-chevron-down card-arrow"></i>
+        </div>
+        <div class="card-body">
+          <p><strong>分析步骤：</strong>逻辑图 → 表达式 → 真值表 → 功能</p>
+          <p><strong>设计步骤：</strong>需求 → 真值表 → 表达式 → 化简 → 逻辑图</p>
+          <p style="margin-top:0.6rem;"><strong>常见组合电路：</strong></p>
+          <ul>
+            <li>加法器（半加器、全加器）</li>
+            <li>译码器、编码器</li>
+            <li>数据选择器、比较器</li>
+          </ul>
+
+          <div class="practice-section">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="example"><i class="fas fa-lightbulb"></i> 例题</button>
+              <button class="tab-btn" data-tab="exercise"><i class="fas fa-pen"></i> 练习</button>
+            </div>
+            <div class="tab-content active" data-content="example">
+              <div class="example-item">
+                <div class="example-title"><span class="tag">例题</span> 半加器</div>
+                <div class="example-question">半加器输入 1 和 1，输出 S 和 C 分别是多少？</div>
+                <button class="btn btn-primary btn-sm reveal-steps"><i class="fas fa-play"></i> 查看解析</button>
+                <div class="step-container">
+                  <div class="step-item"><span class="step-num">1</span>半加器实现一位二进制加法：S = A⊕B，C = A·B。</div>
+                  <div class="step-item"><span class="step-num">2</span>S = 1⊕1 = 0（不同出 1，相同出 0）。</div>
+                  <div class="step-item"><span class="step-num">3</span>C = 1·1 = 1（产生进位）。</div>
+                  <div class="step-item"><span class="step-num">4</span>即 1 + 1 = 10（二进制），本位上 0，进位 1。</div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" data-content="exercise">
+              <div class="exercise-item" data-answer="B" data-type="choice">
+                <div class="exercise-question">
+                  <span class="q-num">1</span>半加器的和 S 等于什么？
+                </div>
+                <div class="options">
+                  <button class="option-btn" data-value="A">A. A·B</button>
+                  <button class="option-btn" data-value="B">B. A⊕B</button>
+                  <button class="option-btn" data-value="C">C. A+B</button>
+                  <button class="option-btn" data-value="D">D. (A·B)′</button>
+                </div>
+                <button class="btn btn-primary btn-sm check-answer"><i class="fas fa-check"></i> 提交答案</button>
+                <div class="feedback"><div class="fb-title"></div><div class="solution"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      <i class="fas fa-graduation-cap"></i> 计算机组成原理 · 第一、二章 · 点击卡片展开，例题/练习可交互
+    </div>
+  </div>
+
+  <button class="totop" id="toTop" title="回到顶部">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    /* ===== 卡片展开/收起 ===== */
+    document.querySelectorAll('.card-head').forEach(head => {
+      head.addEventListener('click', () => {
+        head.parentElement.classList.toggle('open');
+      });
+    });
+
+    /* ===== 全部展开/收起 ===== */
+    document.getElementById('expandAll').addEventListener('click', () => {
+      document.querySelectorAll('.card').forEach(c => c.classList.add('open'));
+    });
+    document.getElementById('collapseAll').addEventListener('click', () => {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('open'));
+    });
+
+    /* ===== 桌面端下拉菜单 ===== */
+    const navItems = document.querySelectorAll('.nav-item');
+    let hoverTimer = null;
+
+    navItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimer);
+        navItems.forEach(i => i.classList.remove('open'));
+        item.classList.add('open');
+      });
+      item.addEventListener('mouseleave', () => {
+        hoverTimer = setTimeout(() => {
+          item.classList.remove('open');
+        }, 180);
+      });
+      item.querySelector('.nav-trigger').addEventListener('click', (e) => {
+        e.preventDefault();
+        const isOpen = item.classList.contains('open');
+        navItems.forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-item')) {
+        navItems.forEach(i => i.classList.remove('open'));
+      }
+    });
+
+    /* ===== 平滑滚动 ===== */
+    function scrollToTarget(targetId) {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      if (target.classList.contains('card')) {
+        target.classList.add('open');
+      }
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.querySelectorAll('.dropdown a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        scrollToTarget(targetId);
+        document.querySelectorAll('.dropdown a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        navItems.forEach(i => i.classList.remove('open'));
+      });
+    });
+
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        scrollToTarget(targetId);
+        closeMobileMenu();
+      });
+    });
+
+    /* ===== 移动端菜单 ===== */
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobileClose = document.getElementById('mobileClose');
+
+    function openMobileMenu() {
+      mobileMenu.classList.add('show');
+      mobileOverlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('show');
+      mobileOverlay.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    mobileToggle.addEventListener('click', openMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+
+    /* ===== 滚动进度 + 高亮 ===== */
+    const cards = document.querySelectorAll('.card[id]');
+    const chapters = document.querySelectorAll('.chapter');
+    const progressBar = document.getElementById('progressBar');
+    const toTop = document.getElementById('toTop');
+
+    function onScroll() {
+      const scrollY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+      progressBar.style.width = progress + '%';
+
+      const scrollPos = scrollY + 130;
+      let currentId = '';
+      cards.forEach(card => {
+        if (card.offsetTop <= scrollPos) currentId = card.id;
+      });
+      document.querySelectorAll('.dropdown a, .mobile-menu a').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + currentId);
+      });
+
+      const scrollPos2 = scrollY + 100;
+      let currentChapter = '';
+      chapters.forEach(ch => {
+        if (ch.offsetTop <= scrollPos2) currentChapter = ch.id;
+      });
+      document.querySelectorAll('.nav-trigger').forEach(t => {
+        t.classList.toggle('active', t.dataset.target === currentChapter);
+      });
+
+      toTop.classList.toggle('show', scrollY > 400);
+    }
+
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+
+    toTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    /* ===== 选项卡切换 ===== */
+    document.querySelectorAll('.practice-section').forEach(section => {
+      const tabBtns = section.querySelectorAll('.tab-btn');
+      const tabContents = section.querySelectorAll('.tab-content');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          tabBtns.forEach(b => b.classList.toggle('active', b === btn));
+          tabContents.forEach(c => {
+            c.classList.toggle('active', c.dataset.content === tab);
+          });
+        });
+      });
+    });
+
+    /* ===== 例题：逐步显示解析 ===== */
+    document.querySelectorAll('.reveal-steps').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const container = btn.nextElementSibling;
+        const steps = container.querySelectorAll('.step-item');
+        const isShowing = container.classList.contains('show');
+
+        if (isShowing) {
+          container.classList.remove('show');
+          steps.forEach(s => s.classList.remove('visible'));
+          btn.innerHTML = '<i class="fas fa-play"></i> 查看解析';
+        } else {
+          container.classList.add('show');
+          steps.forEach((step, i) => {
+            setTimeout(() => {
+              step.classList.add('visible');
+            }, i * 250);
+          });
+          btn.innerHTML = '<i class="fas fa-eye-slash"></i> 隐藏解析';
+        }
+      });
+    });
+
+    /* ===== 练习：即时判断 ===== */
+    document.querySelectorAll('.exercise-item').forEach(item => {
+      const type = item.dataset.type;
+      const answer = item.dataset.answer;
+      const feedback = item.querySelector('.feedback');
+      const fbTitle = feedback.querySelector('.fb-title');
+      const solution = feedback.querySelector('.solution');
+      const checkBtn = item.querySelector('.check-answer');
+
+      if (type === 'choice') {
+        // 选择题：点击选项直接选中
+        const options = item.querySelectorAll('.option-btn');
+        let selected = null;
+
+        options.forEach(opt => {
+          opt.addEventListener('click', () => {
+            if (opt.disabled) return;
+            options.forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            selected = opt.dataset.value;
+          });
+        });
+
+        checkBtn.addEventListener('click', () => {
+          if (!selected) {
+            fbTitle.innerHTML = '<i class="fas fa-exclamation-circle"></i> 请先选择一个选项';
+            feedback.className = 'feedback show wrong';
+            solution.textContent = '';
+            return;
+          }
+
+          const correct = selected === answer;
+          // 标记选项
+          options.forEach(opt => {
+            opt.disabled = true;
+            if (opt.dataset.value === answer) {
+              opt.classList.add('correct');
+            } else if (opt.dataset.value === selected) {
+              opt.classList.add('wrong');
+            }
+          });
+
+          if (correct) {
+            feedback.className = 'feedback show correct';
+            fbTitle.innerHTML = '<i class="fas fa-check-circle"></i> 回答正确！';
+            item.classList.add('pulse-correct');
+            setTimeout(() => item.classList.remove('pulse-correct'), 600);
+          } else {
+            feedback.className = 'feedback show wrong';
+            fbTitle.innerHTML = '<i class="fas fa-times-circle"></i> 回答错误';
+          }
+
+          solution.innerHTML = '<strong>解析：</strong>' + (item.dataset.solution || getSolution(item));
+        });
+      } else if (type === 'fill') {
+        // 填空题
+        const input = item.querySelector('.answer-input');
+
+        // 回车也可以提交
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') checkBtn.click();
+        });
+
+        input.addEventListener('input', () => {
+          input.classList.remove('correct', 'wrong');
+          feedback.classList.remove('show');
+        });
+
+        checkBtn.addEventListener('click', () => {
+          const userAnswer = input.value.trim();
+          if (!userAnswer) {
+            fbTitle.innerHTML = '<i class="fas fa-exclamation-circle"></i> 请先输入答案';
+            feedback.className = 'feedback show wrong';
+            solution.textContent = '';
+            return;
+          }
+
+          // 支持多个答案（用 | 分隔）
+          const answers = answer.split('|').map(a => a.trim());
+          const correct = answers.some(a => 
+            a.toLowerCase() === userAnswer.toLowerCase() ||
+            a.replace(/\s+/g, '') === userAnswer.replace(/\s+/g, '')
+          );
+
+          if (correct) {
+            input.classList.add('correct');
+            feedback.className = 'feedback show correct';
+            fbTitle.innerHTML = '<i class="fas fa-check-circle"></i> 回答正确！';
+            item.classList.add('pulse-correct');
+            setTimeout(() => item.classList.remove('pulse-correct'), 600);
+          } else {
+            input.classList.add('wrong');
+            feedback.className = 'feedback show wrong';
+            fbTitle.innerHTML = '<i class="fas fa-times-circle"></i> 回答错误';
+          }
+
+          solution.innerHTML = '<strong>正确答案：</strong>' + answer.replace(/\|/g, ' 或 ') + '<br><strong>解析：</strong>' + (item.dataset.solution || getSolution(item));
+        });
+      }
+    });
+
+    /* 根据题目自动生成简单解析 */
+    function getSolution(item) {
+      const q = item.querySelector('.exercise-question').textContent;
+      if (q.includes('存储') && q.includes('指令和数据')) {
+        return '冯·诺依曼结构中，指令和数据都以二进制形式存放在同一存储器中。';
+      }
+      if (q.includes('PC')) {
+        return 'PC 是 Program Counter 的缩写，中文是程序计数器。';
+      }
+      if (q.includes('系统软件')) {
+        return '操作系统负责管理硬件资源，是典型的系统软件。';
+      }
+      if (q.includes('指令周期')) {
+        return '指令周期包含若干机器周期，机器周期又包含若干时钟周期。';
+      }
+      if (q.includes('CPU 执行时间') || q.includes('执行时间为')) {
+        return 'CPU时间 = 指令数 × CPI ÷ 时钟频率 = 10⁶ × 1 / (500×10⁶) = 0.002 s = 2 ms。';
+      }
+      if (q.includes('第一代')) {
+        return '第一代计算机使用电子管作为主要元器件。';
+      }
+      if (q.includes('负逻辑')) {
+        return '负逻辑：高电平表示 0，低电平表示 1。';
+      }
+      if (q.includes('A⊕B')) {
+        return '异或：相同出 0，不同出 1。A=B=1，所以为 0。';
+      }
+      if (q.includes('A⊙B')) {
+        return '同或：相同出 1，不同出 0。A=1，B=0，不同，所以为 0。';
+      }
+      if (q.includes('摩根定律')) {
+        return '摩根定律：(AB)′ = A′ + B′。';
+      }
+      if (q.includes('吸收律')) {
+        return '吸收律：A + AB = A。';
+      }
+      if (q.includes('最小项')) {
+        return '最小项要求每个变量以原或反形式出现一次。A′BC 符合。';
+      }
+      if (q.includes('A + A′B')) {
+        return '消去法：A + A′B = A + B。';
+      }
+      if (q.includes('或门')) {
+        return '或门：有 1 就输出 1。所以 0+1=1。';
+      }
+      if (q.includes('与非门')) {
+        return '与非门：先与后非。1·0=0，0′=1。等等——正确答案应为 1。（若为 1·0 则输出 1）';
+      }
+      if (q.includes('半加器')) {
+        return '半加器 S = A⊕B，C = A·B。';
+      }
+      return '请结合知识点进行思考。';
+    }
+
+    /* ===== 默认展开第一个卡片 ===== */
+    document.querySelector('#c11').classList.add('open');
+  </script>
+</body>
+</html>
